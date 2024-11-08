@@ -2,4 +2,4 @@
 
 coursework
 
-![SVG Image](./docs/ЧЕРТИЛА.png)
+![SVG Image](./docs/architecture.png)
