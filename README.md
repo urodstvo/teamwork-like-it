@@ -1,2 +1,5 @@
 # teamwork-like-it
-coursework 
+
+coursework
+
+![SVG Image](./docs/architecture.png)
