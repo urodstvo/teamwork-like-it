@@ -1,0 +1,25 @@
+{
+  "name": "DevContainer",
+  "dockerComposeFile": ["./docker-compose.yaml", "../docker-compose.dev.yaml"],
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "donjayamanne.python-extension-pack",
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+  "remoteUser": "user",
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://urodstvo:urodstvo@db:5432/urodstvo"
+  }
+}

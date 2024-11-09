@@ -1,0 +1,16 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+    volumes:
+      - ..:/workspace:cached
+    hostname: dev
+    command: /bin/bash -c "while sleep 1000; do :; done" # Оставляем контейнер активным
+    depends_on:
+      db:
+        condition: service_healthy

@@ -2,3 +2,5 @@ venv
 .env*
 !.env.example
 .volumes
+postgres_data
+node_modules
