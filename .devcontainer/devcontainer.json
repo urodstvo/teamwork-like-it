@@ -6,9 +6,6 @@
   "shutdownAction": "stopCompose",
   "customizations": {
     "vscode": {
-      "settings": {
-        "editor.formatOnSave": true
-      },
       "extensions": [
         "donjayamanne.python-extension-pack",
         "golang.go",
@@ -20,7 +17,5 @@
     }
   },
   "remoteUser": "user",
-  "remoteEnv": {
-    "DATABASE_URL": "postgresql://urodstvo:urodstvo@db:5432/urodstvo"
-  }
+  "remoteEnv": {}
 }
