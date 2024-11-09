@@ -1,5 +1,5 @@
 services:
-  dev:
+  dev-container:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -11,6 +11,3 @@ services:
       - ..:/workspace:cached
     hostname: dev
     command: /bin/bash -c "while sleep 1000; do :; done" # Оставляем контейнер активным
-    depends_on:
-      db:
-        condition: service_healthy

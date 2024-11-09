@@ -14,6 +14,27 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+    networks:
+      - devnet
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - '8888:8080'
+    environment:
+      - ADMINER_DEFAULT_SERVER=db:5432
+      - ADMINER_PLUGINS=enum-types enum-option json-column
+    networks:
+      - devnet
+    depends_on:
+      db:
+        condition: service_healthy
+
 
 volumes:
   postgres_data:
+
+networks:
+  devnet:
+    driver: bridge

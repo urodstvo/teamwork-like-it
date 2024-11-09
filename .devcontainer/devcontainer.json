@@ -1,7 +1,7 @@
 {
   "name": "DevContainer",
   "dockerComposeFile": ["./docker-compose.yaml", "../docker-compose.dev.yaml"],
-  "service": "dev",
+  "service": "dev-container",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
   "customizations": {
