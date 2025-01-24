@@ -2,8 +2,19 @@
   "cSpell.words": ["chertila"],
 
   // Disable the default formatter, use eslint instead
-  "prettier.enable": false,
+  "prettier.enable": true,
+  // Set the default
   "editor.formatOnSave": false,
+  // Enable per-language
+  "[javascript]": {
+      "editor.formatOnSave": true
+  },
+  "[typescript]": {
+      "editor.formatOnSave": true
+  },
+  "[vue]": {
+      "editor.formatOnSave": true
+  },
 
   // Auto fix
   "editor.codeActionsOnSave": {
