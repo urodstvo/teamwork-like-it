@@ -1,6 +1,13 @@
+import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import App from './App.vue'
 import './index.css'
 
-createApp(App).mount('#app')
+document.title = 'Canvas Practice'
+
+const pinia = createPinia()
+const app = createApp(App)
+
+app.use(pinia)
+app.mount('#app')

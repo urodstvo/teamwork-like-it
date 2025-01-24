@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] make possible ctrl + z;
 - [ ] add key bindings
 - [ ] make group of elements
 - [ ] add UML elements
