@@ -13,6 +13,7 @@ export function changeResizeDirectionOnBoundIntersect(state: EditorState, cursor
 	if (!state.selectionFrame) return
 
 	const { left, right, top, bottom } = state.resizeDirection
+	let swapped = false
 
 	if (cursorX < state.selectionFrame.leftX && right) {
 		const temp = state.selectionFrame.leftX
@@ -20,6 +21,7 @@ export function changeResizeDirectionOnBoundIntersect(state: EditorState, cursor
 		state.selectionFrame.rightX = temp
 		state.resizeDirection.left = true
 		state.resizeDirection.right = false
+		swapped = true
 	}
 	if (cursorX > state.selectionFrame.rightX && left) {
 		const temp = state.selectionFrame.leftX
@@ -27,12 +29,14 @@ export function changeResizeDirectionOnBoundIntersect(state: EditorState, cursor
 		state.selectionFrame.rightX = temp
 		state.resizeDirection.left = false
 		state.resizeDirection.right = true
+		swapped = true
 	}
 	if (cursorY < state.selectionFrame.leftY && bottom) {
 		const temp = state.selectionFrame.leftY
 		state.selectionFrame.leftY = state.selectionFrame.rightY
 		state.selectionFrame.rightY = temp
 		state.resizeDirection.top = true
+		swapped = true
 		state.resizeDirection.bottom = false
 	}
 	if (cursorY > state.selectionFrame.rightY && top) {
@@ -41,5 +45,8 @@ export function changeResizeDirectionOnBoundIntersect(state: EditorState, cursor
 		state.selectionFrame.rightY = temp
 		state.resizeDirection.top = false
 		state.resizeDirection.bottom = true
+		swapped = true
 	}
+
+	return swapped
 }

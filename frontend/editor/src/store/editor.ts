@@ -3,45 +3,47 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useEditorStore = defineStore('canvas-app', () => {
-	const canvasGridSize = ref(100)
+	const canvasGridSize = 100
 	const staticCanvasRef = ref<HTMLCanvasElement | null>(null)
 	const interactiveCanvasRef = ref<HTMLCanvasElement | null>(null)
 	const staticCtx = ref<CanvasRenderingContext2D | null>(null)
 	const interactiveCtx = ref<CanvasRenderingContext2D | null>(null)
 	const canvasOffset = ref<{ offsetX: number, offsetY: number }>({ offsetX: 0, offsetY: 0 })
 
-	const elements = ref<Element[]>([])
-	const selectedElementsIds = ref<string[]>([])
+	// const elements = ref<Element[]>([])
+	const elements = [] as Element[]
 
-	const isDragging = ref(false)
-	const isSelecting = ref(false)
-	const isReplacing = ref(false)
-	const isResizing = ref(false)
+	const isDragging = false
+	const isSelecting = false
+	const isReplacing = false
+	const isResizing = false
 
-	const selectionArea = ref<{
+	const selectionArea = null as {
 		leftX: number
 		leftY: number
 		rightX: number
 		rightY: number
-	} | null>(null)
-	const selectionFrame = ref<{ leftX: number, leftY: number, rightX: number, rightY: number } | null>(null)
+	} | null
+	const selectionFrame = null as { leftX: number, leftY: number, rightX: number, rightY: number } | null
+	const selectedElementsIds = [] as string[]
+	const selectedElementsFixedState = new Map<string, Element>()
 
-	const startDragPosition = ref<{ x: number, y: number } | null>(null)
-	const replaceFrameOffset = ref<{ x: number, y: number }>({ x: 0, y: 0 })
+	const startDragPosition = null as { x: number, y: number } | null
+	const replaceFrameOffset = { x: 0, y: 0 }
 
-	const zoom = ref(1.0)
-	const zoomedTo = ref({ x: 0, y: 0 })
+	const zoom = 1.0
+	const zoomedTo = { x: 0, y: 0 }
 
-	const newElement = ref<Element | null>(null)
-	const lastElementType = ref<ElementType>(ElementType.ELLIPSE)
-	const cursorPosition = ref({ x: 0, y: 0 })
+	const newElement = null as Element | null
+	const lastElementType = ElementType.ELLIPSE
+	const cursorPosition = { x: 0, y: 0 }
 
-	const resizeDirection = ref({
+	const resizeDirection = {
 		left: false,
 		right: false,
 		top: false,
 		bottom: false,
-	})
+	}
 
 	return {
 		canvasGridSize,
@@ -66,6 +68,7 @@ export const useEditorStore = defineStore('canvas-app', () => {
 		zoomedTo,
 		isResizing,
 		resizeDirection,
+		selectedElementsFixedState,
 	}
 })
 

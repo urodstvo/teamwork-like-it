@@ -2,11 +2,11 @@
 import { renderInteractiveScene } from '@/renderer'
 import { handleContextMenu, handlePointerDown, handlePointerMove, handlePointerUp, handleWheel } from '@/scene/events'
 import { useEditorStore } from '@/store'
-import { storeToRefs } from 'pinia'
+// import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
 const store = useEditorStore()
-const storeRefs = storeToRefs(store)
+// const storeRefs = storeToRefs(store)
 
 const interactiveCanvas = ref<HTMLCanvasElement | null>(null)
 
@@ -16,8 +16,8 @@ onMounted(() => {
 	interactiveCanvas.value.width = window.innerWidth
 	interactiveCanvas.value.height = window.innerHeight
 
-	storeRefs.interactiveCtx.value = interactiveCanvas.value.getContext('2d')!
-	storeRefs.interactiveCanvasRef.value = interactiveCanvas.value
+	store.interactiveCtx = interactiveCanvas.value.getContext('2d')!
+	store.interactiveCanvasRef = interactiveCanvas.value
 
 	renderInteractiveScene(store, true)
 

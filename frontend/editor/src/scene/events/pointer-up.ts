@@ -19,7 +19,6 @@ export function handlePointerUp(event: PointerEvent, state: EditorState) {
 				state.resizeDirection.top = false
 				state.resizeDirection.bottom = false
 				state.resizeDirection.right = false
-
 				document.body.style.cursor = 'default'
 			}
 

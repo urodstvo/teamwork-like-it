@@ -1,7 +1,7 @@
 import type { EditorState } from '@/store'
 import { getElementWithCursorInside } from '@/elements'
 import { getPointerPosition } from '@/lib/helpers'
-import { isCursorInSelectionFrame, isCursorOnSelectionFrameBound } from '@/scene/selection'
+import { getSelectionFrame, isCursorInSelectionFrame, isCursorOnSelectionFrameBound } from '@/scene/selection'
 
 export function handlePointerDown(event: PointerEvent, state: EditorState) {
 	const { x, y } = getPointerPosition(event, state.interactiveCanvasRef!, state.zoom)
@@ -10,8 +10,10 @@ export function handlePointerDown(event: PointerEvent, state: EditorState) {
 		case 0: {
 			if (state.newElement) {
 				state.newElement.restyle('rgba(0,0,0,1)', 'rgba(0,0,0,1)')
+				state.newElement.moveBy(-state.canvasOffset.offsetX, -state.canvasOffset.offsetY)
 				state.elements.push(state.newElement)
 				state.lastElementType = state.newElement.type
+				state.selectedElementsIds = [state.newElement.id]
 				state.newElement = null
 				document.body.style.cursor = 'default'
 
@@ -21,9 +23,11 @@ export function handlePointerDown(event: PointerEvent, state: EditorState) {
 			const cursorX = x - state.canvasOffset.offsetX
 			const cursorY = y - state.canvasOffset.offsetY
 			if (state.selectionFrame) {
-				if (isCursorInSelectionFrame(state.selectionFrame, cursorX, cursorY)) {
+				const selectedElements = state.elements.filter(el => state.selectedElementsIds.includes(el.id))
+				const selectionFrame = getSelectionFrame(selectedElements)
+				if (isCursorInSelectionFrame(selectionFrame, cursorX, cursorY)) {
 					const cursorOnSelectionFrameBound = isCursorOnSelectionFrameBound(
-						state.selectionFrame,
+						selectionFrame,
 						cursorX,
 						cursorY,
 					)
@@ -40,12 +44,13 @@ export function handlePointerDown(event: PointerEvent, state: EditorState) {
 					}
 
 					state.isReplacing = true
-					state.replaceFrameOffset.x = cursorX - state.selectionFrame.leftX
-					state.replaceFrameOffset.y = cursorY - state.selectionFrame.leftY
+					state.replaceFrameOffset.x = cursorX - selectionFrame.leftX
+					state.replaceFrameOffset.y = cursorY - selectionFrame.leftY
 
 					return
 				}
 				else {
+					state.selectedElementsFixedState.clear()
 					state.selectionFrame = null
 					state.selectedElementsIds = []
 				}

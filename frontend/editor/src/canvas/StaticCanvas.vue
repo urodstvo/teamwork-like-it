@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { renderStaticScene } from '@/renderer'
 import { useEditorStore } from '@/store'
-import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
 const store = useEditorStore()
-const storeRefs = storeToRefs(store)
 
 const staticCanvas = ref<HTMLCanvasElement | null>(null)
 
@@ -15,8 +13,8 @@ onMounted(() => {
 	staticCanvas.value.width = window.innerWidth
 	staticCanvas.value.height = window.innerHeight
 
-	storeRefs.staticCtx.value = staticCanvas.value.getContext('2d')!
-	storeRefs.staticCanvasRef.value = staticCanvas.value
+	store.staticCtx = staticCanvas.value.getContext('2d')!
+	store.staticCanvasRef = staticCanvas.value
 
 	renderStaticScene(store, true)
 

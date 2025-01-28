@@ -1,6 +1,6 @@
 import type { Element } from '@/elements'
 import type { EditorState } from '@/store'
-import { throttleRAF } from '@/lib/utils.ts'
+// import { throttleRAF } from '@/lib/utils.ts'
 import { _clearCanvas, _transformCanvas } from '.'
 import { renderElements } from './element.ts'
 
@@ -68,10 +68,10 @@ function _renderStaticScene(appState: EditorState) {
 }
 
 /** throttled to animation framerate */
-const _renderStaticSceneThrottled = throttleRAF(
-	(state: EditorState) => { _renderStaticScene(state) },
-	{ trailing: true },
-)
+// const _renderStaticSceneThrottled = throttleRAF(
+// 	(state: EditorState) => { _renderStaticScene(state) },
+// 	{ trailing: true },
+// )
 
 export function renderStaticScene(state: EditorState, throttle?: boolean) {
 	if (throttle) {

@@ -75,6 +75,14 @@ export class BaseElement {
 	}
 
 	/**
+	 * Element method for resizing with factor.
+	 */
+	resizeByFactor(factorX: number, factorY?: number) {
+		this.width = normalizePoint(this.width * factorX)
+		this.height = normalizePoint(factorY ? this.height * factorY : this.height * factorX)
+	}
+
+	/**
 	 * Element method for moving by a certain value.
 	 */
 	moveBy(x: number, y: number) {

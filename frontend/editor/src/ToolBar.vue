@@ -2,10 +2,9 @@
 import { ElementType, newElement } from '@/elements'
 import { useEditorStore } from '@/store'
 import { Circle, MoveUpRight, Square } from 'lucide-vue-next'
-import { storeToRefs } from 'pinia'
 
-const canvasStore = useEditorStore()
-const refs = storeToRefs(canvasStore)
+const store = useEditorStore()
+// const refs = storeToRefs(canvasStore)
 
 // const newElementClick = () => {
 //   if (canvasStore.newElement) {
@@ -18,12 +17,12 @@ const refs = storeToRefs(canvasStore)
 // }
 
 function buttonClick(type: ElementType) {
-	if (canvasStore.newElement) {
-		refs.newElement.value = null
+	if (store.newElement) {
+		store.newElement = null
 		document.body.style.cursor = 'default'
 	}
 	else {
-		refs.newElement.value = newElement(type, -1000, -1000, 'rgba(0, 0, 0, 0.1)')
+		store.newElement = newElement(type, -1000, -1000, 'rgba(0, 0, 0, 0.1)')
 		document.body.style.cursor = 'copy'
 	}
 }
@@ -33,23 +32,23 @@ function buttonClick(type: ElementType) {
   <section class="toolbar">
     <div
       class="toolbar__content"
-      :class="{ hidden: canvasStore.isReplacing || canvasStore.isDragging || canvasStore.isDragging }"
+      :class="{ hidden: store.isReplacing || store.isDragging || store.isDragging }"
     >
       <div class="zoom">
-        zoom: {{ canvasStore.zoom * 100 }}%
+        zoom: {{ store.zoom * 100 }}%
       </div>
       <div class="divider" />
       <div class="actions">
         <button
-          :class="{ active: refs.newElement.value?.type === ElementType.RECTANGLE }"
-          :aria-pressed="refs.newElement.value?.type === ElementType.RECTANGLE"
+          :class="{ active: store.newElement?.type === ElementType.RECTANGLE }"
+          :aria-pressed="store.newElement?.type === ElementType.RECTANGLE"
           @click="() => buttonClick(ElementType.RECTANGLE)"
         >
           <Square class="icon" />
         </button>
         <button
-          :class="{ active: refs.newElement.value?.type === ElementType.ELLIPSE }"
-          :aria-pressed="refs.newElement.value?.type === ElementType.ELLIPSE"
+          :class="{ active: store.newElement?.type === ElementType.ELLIPSE }"
+          :aria-pressed="store.newElement?.type === ElementType.ELLIPSE"
           @click="() => buttonClick(ElementType.ELLIPSE)"
         >
           <Circle class="icon" />

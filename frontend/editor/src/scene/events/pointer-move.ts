@@ -6,7 +6,7 @@ import {
 	getSelectionFrame,
 	isCursorInSelectionFrame,
 	isCursorOnSelectionFrameBound,
-	moveSelectionFrame,
+	replaceSelectionFrame,
 	resizeSelectionFrame,
 } from '@/scene/selection.ts'
 
@@ -51,20 +51,15 @@ export function handlePointerMove(event: PointerEvent, state: EditorState) {
 		const cursorX = x - state.canvasOffset.offsetX
 		const cursorY = y - state.canvasOffset.offsetY
 
-		if (state.isReplacing) {
-			if (state.replaceFrameOffset) {
-				const dx = cursorX - state.selectionFrame.leftX - state.replaceFrameOffset.x
-				const dy = cursorY - state.selectionFrame.leftY - state.replaceFrameOffset.y
+		if (state.isReplacing) replaceSelectionFrame(state, cursorX, cursorY)
+		const selectedElements = state.elements.filter(el => state.selectedElementsIds.includes(el.id))
+		const selectionFrame = getSelectionFrame(selectedElements)
 
-				moveSelectionFrame(state, dx, dy)
-			}
-		}
-
-		const cursorInSelectionFrame = isCursorInSelectionFrame(state.selectionFrame, cursorX, cursorY)
-		const cursorOnSelectionFrameBound = isCursorOnSelectionFrameBound(state.selectionFrame, cursorX, cursorY)
+		const cursorInSelectionFrame = isCursorInSelectionFrame(selectionFrame, cursorX, cursorY)
+		const cursorOnSelectionFrameBound = isCursorOnSelectionFrameBound(selectionFrame, cursorX, cursorY)
 		if ((cursorInSelectionFrame && !state.isResizing) || state.isReplacing) {
 			if (cursorOnSelectionFrameBound.some(el => el))
-				document.body.style.cursor = `${getDirection(state.selectionFrame, cursorX, cursorY)}-resize`
+				document.body.style.cursor = `${getDirection(selectionFrame, cursorX, cursorY)}-resize`
 			else document.body.style.cursor = 'move'
 		}
 		else if (state.isResizing) {

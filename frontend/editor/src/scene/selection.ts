@@ -1,5 +1,5 @@
+import type { Element } from '@/elements'
 import type { EditorState } from '@/store'
-import { type Element, moveElements } from '@/elements'
 import { changeResizeDirectionOnBoundIntersect, normalizePoint } from '@/lib/helpers'
 
 export function getDirection(selectionFrame: Exclude<EditorState['selectionFrame'], null>, cursorX: number, cursorY: number) {
@@ -85,67 +85,97 @@ export function isCursorOnSelectionFrameBound(selectionFrame: Exclude<EditorStat
 	return [isCursorOnLeftBound, isCursorOnTopBound, isCursorOnRightBound, isCursorOnBottomBound]
 }
 
-export function moveSelectionFrame(appState: EditorState, moveByX: number, moveByY: number) {
-	if (appState.selectionFrame) {
-		const selectedElements = appState.elements.filter(el => appState.selectedElementsIds.includes(el.id))
-		moveElements(selectedElements, moveByX, moveByY)
+export function replaceSelectionFrame(state: EditorState, cursorX: number, cursorY: number) {
+	if (!state.selectionFrame) return
+	if (!state.replaceFrameOffset) return
 
-		const newSelectionFrame = getSelectionFrame(selectedElements)
-		appState.selectionFrame.leftX = newSelectionFrame.leftX
-		appState.selectionFrame.leftY = newSelectionFrame.leftY
-		appState.selectionFrame.rightX = newSelectionFrame.rightX
-		appState.selectionFrame.rightY = newSelectionFrame.rightY
-	}
+	const selectedElements = state.elements.filter(el => state.selectedElementsIds.includes(el.id))
+	selectedElements.forEach((el) => {
+		const prevState = state.selectedElementsFixedState.get(el.id)
+		if (!prevState) {
+			state.selectedElementsFixedState.set(el.id, JSON.parse(JSON.stringify(el)))
+		}
+		const { x, y } = prevState || el
+		const dx = cursorX - state.selectionFrame!.leftX - state.replaceFrameOffset.x
+		const dy = cursorY - state.selectionFrame!.leftY - state.replaceFrameOffset.y
+		el.moveTo(x + dx, y + dy)
+
+		state.selectedElementsFixedState.set(el.id, JSON.parse(JSON.stringify(el)))
+		return el
+	})
+
+	const newSelectionFrame = getSelectionFrame(selectedElements)
+	state.selectionFrame.leftX = newSelectionFrame.leftX
+	state.selectionFrame.leftY = newSelectionFrame.leftY
+	state.selectionFrame.rightX = newSelectionFrame.rightX
+	state.selectionFrame.rightY = newSelectionFrame.rightY
 }
 
-export function resizeSelectionFrame(appState: EditorState, cursorX: number, cursorY: number) {
-	if (!appState.resizeDirection) return
-	if (!appState.selectionFrame) return
+export function resizeSelectionFrame(state: EditorState, cursorX: number, cursorY: number) {
+	if (!state.resizeDirection) return
+	if (!state.selectionFrame) return
 
-	changeResizeDirectionOnBoundIntersect(appState, cursorX, cursorY)
+	changeResizeDirectionOnBoundIntersect(state, cursorX, cursorY)
 
-	const selectionFrame = appState.selectionFrame
-	const { right, left, top, bottom } = appState.resizeDirection
+	const selectionFrame = state.selectionFrame
+	const { right, left, top, bottom } = state.resizeDirection
 
-	const selectedElements = appState.elements.filter(el => appState.selectedElementsIds.includes(el.id))
-	const inFrameManyElements = selectedElements.length > 1
-	const inFrameOneElement = selectedElements.length === 1
+	const selectedElements = state.elements.filter(el => state.selectedElementsIds.includes(el.id))
 
 	let newLeftX = selectionFrame.leftX
 	let newLeftY = selectionFrame.leftY
 	let newRightX = selectionFrame.rightX
 	let newRightY = selectionFrame.rightY
 
-	// const oldWidth = newRightX - newLeftX;
-	// const oldHeight = newRightY - newLeftY;
+	const oldWidth = newRightX - newLeftX
+	const oldHeight = newRightY - newLeftY
 
-	const diffX = left ? selectionFrame.rightX - cursorX : cursorX - selectionFrame.leftX
-	const diffY = top ? selectionFrame.rightY - cursorY : cursorY - selectionFrame.leftY
+	const diffX = normalizePoint(left ? selectionFrame.rightX - cursorX : cursorX - selectionFrame.leftX)
+	const diffY = normalizePoint(top ? selectionFrame.rightY - cursorY : cursorY - selectionFrame.leftY)
 
-	if (right) newRightX = selectionFrame.leftX + normalizePoint(diffX)
-	if (left) newLeftX = selectionFrame.rightX - normalizePoint(diffX)
-	if (top) newLeftY = selectionFrame.rightY - normalizePoint(diffY)
-	if (bottom) newRightY = selectionFrame.leftY + normalizePoint(diffY)
+	if (right) newRightX = selectionFrame.leftX + diffX
+	if (left) newLeftX = selectionFrame.rightX - diffX
+	if (top) newLeftY = selectionFrame.rightY - diffY
+	if (bottom) newRightY = selectionFrame.leftY + diffY
 
 	const newWidth = newRightX - newLeftX
 	const newHeight = newRightY - newLeftY
 
-	if (inFrameOneElement) {
-		selectedElements[0].moveTo(newLeftX, newLeftY)
-		selectedElements[0].resize(newWidth, newHeight)
-	}
-	// TODO
-	if (inFrameManyElements) {
-		selectedElements.forEach(el => el.resize(newWidth, newHeight))
-	}
+	const factorX = newWidth / (oldWidth || 10)
+	const factorY = newHeight / (oldHeight || 10)
 
-	const newSelectionFrame = getSelectionFrame(selectedElements)
+	selectedElements.forEach((el) => {
+		const prevState = state.selectedElementsFixedState.get(el.id)
+		if (!prevState) {
+			state.selectedElementsFixedState.set(el.id, JSON.parse(JSON.stringify(el)))
+		}
+		const { x, y, width, height } = prevState || el
+		let xInFrame = left ? selectionFrame.rightX - x - width : x - selectionFrame.leftX
+		let yInFrame = top ? selectionFrame.rightY - y - height : y - selectionFrame.leftY
 
-	appState.selectionFrame.leftX = newSelectionFrame.leftX
-	appState.selectionFrame.leftY = newSelectionFrame.leftY
-	appState.selectionFrame.rightX = newSelectionFrame.rightX
-	appState.selectionFrame.rightY = newSelectionFrame.rightY
+		xInFrame *= factorX
+		yInFrame *= factorY
 
-	// resizeElements(selectedElements, appState.resizeDirection, newWidth - oldWidth, newHeight - oldHeight);
-	// console.log(newWidth - oldWidth, newHeight - oldHeight, selectedElements[0].width, selectedElements[0].height);
+		el.resize(normalizePoint(factorX * width), normalizePoint(factorY * height))
+
+		let newX = newLeftX + xInFrame
+		let newY = newLeftY + yInFrame
+
+		if (left) newX = newRightX - xInFrame - el.width
+		if (top) newY = newRightY - yInFrame - el.height
+
+		el.moveTo(newX, newY)
+
+		if (el.width < 0) {
+			el.x += el.width
+			el.width = -el.width
+		}
+
+		if (el.height < 0) {
+			el.y += el.height
+			el.height = -el.height
+		}
+
+		return el
+	})
 }

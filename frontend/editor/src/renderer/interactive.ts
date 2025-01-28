@@ -1,5 +1,6 @@
 import type { EditorState } from '@/store'
-import { throttleRAF } from '@/lib/utils.ts'
+// import { throttleRAF } from '@/lib/utils.ts'
+import { getSelectionFrame } from '@/scene/selection.ts'
 import { _clearCanvas, _transformCanvas } from '.'
 import { renderSelectionArea, renderSelectionFrame } from './selection'
 
@@ -11,15 +12,17 @@ function _renderInteractiveScene(state: EditorState) {
 
 	if (state.isSelecting) renderSelectionArea(state.interactiveCtx!, state.selectionArea!, state.zoom)
 
-	if (state.selectionFrame)
-		renderSelectionFrame(state.interactiveCtx!, state.selectionFrame, state.canvasOffset)
+	if (state.selectedElementsIds.length > 0) {
+		const selectionFrame = getSelectionFrame(state.elements.filter(el => state.selectedElementsIds.includes(el.id)))
+		renderSelectionFrame(state.interactiveCtx!, selectionFrame, state.canvasOffset)
+	}
 }
 
 /** throttled to animation framerate */
-const _renderInteractiveSceneThrottled = throttleRAF(
-	(state: EditorState) => { _renderInteractiveScene(state) },
-	{ trailing: true },
-)
+// const _renderInteractiveSceneThrottled = throttleRAF(
+// 	(state: EditorState) => { _renderInteractiveScene(state) },
+// 	{ trailing: true },
+// )
 
 export function renderInteractiveScene(state: EditorState, throttle?: boolean) {
 	if (throttle) {
