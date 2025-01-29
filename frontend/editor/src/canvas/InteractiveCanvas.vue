@@ -11,20 +11,20 @@ const store = useEditorStore()
 const interactiveCanvas = ref<HTMLCanvasElement | null>(null)
 
 onMounted(() => {
-	if (!interactiveCanvas.value) return
+  if (!interactiveCanvas.value) return
 
-	interactiveCanvas.value.width = window.innerWidth
-	interactiveCanvas.value.height = window.innerHeight
+  interactiveCanvas.value.width = window.innerWidth
+  interactiveCanvas.value.height = window.innerHeight
 
-	store.interactiveCtx = interactiveCanvas.value.getContext('2d')!
-	store.interactiveCanvasRef = interactiveCanvas.value
+  store.interactiveCtx = interactiveCanvas.value.getContext('2d')!
+  store.interactiveCanvasRef = interactiveCanvas.value
 
-	renderInteractiveScene(store, true)
+  renderInteractiveScene(store, true)
 
-	window.addEventListener('resize', () => {
-		interactiveCanvas.value!.width = window.innerWidth
-		interactiveCanvas.value!.height = window.innerHeight
-	})
+  window.addEventListener('resize', () => {
+    interactiveCanvas.value!.width = window.innerWidth
+    interactiveCanvas.value!.height = window.innerHeight
+  })
 })
 </script>
 
@@ -44,13 +44,13 @@ onMounted(() => {
 
 <style scoped>
 #interactiveCanvas {
-    background: transparent none;
-    /* border: 1px solid black; */
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 10;
+  background: transparent none;
+  /* border: 1px solid black; */
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
 }
 </style>

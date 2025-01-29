@@ -8,7 +8,6 @@
 - [ ] add basic elements (arrow, circle, triangle, ...)
 - [ ] insert text
 - [ ] zoom to selection
-- [ ] rotate selection frame with elements
 
 ---
 

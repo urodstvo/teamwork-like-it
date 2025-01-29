@@ -1,3 +1,3 @@
 export function handleContextMenu(event: MouseEvent) {
-	event.preventDefault()
+  event.preventDefault()
 }
