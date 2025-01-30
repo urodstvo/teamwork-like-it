@@ -1,5 +1,7 @@
 import type { EditorState } from '@/store'
+import { TextElement } from '@/elements'
 import { normalizePoint } from '@/lib/helpers'
+import { generateId } from '@/lib/utils.ts'
 
 export enum ElementType {
   BASE = 'base',
@@ -18,6 +20,7 @@ export interface BaseElementType {
   fillColor: string
   strokeColor: string
   type: ElementType
+  text: TextElement
 
   visibility: boolean
 }
@@ -48,14 +51,15 @@ export class BaseElement {
   strokeColor: string
 
   visibility: boolean = true
+  text: TextElement = new TextElement()
 
   /**
    * Element constructor for creating an instance.
    */
   constructor(props?: Partial<BaseElementType>) {
     // generating a unique id for a new element
-    this.id = Date.now().toString(36) + Math.random().toString(36).substring(2)
-    this.name = props?.type ?? ElementType.BASE
+    this.id = generateId()
+    this.name = `${props?.type ?? ElementType.BASE} ${this.id}`
 
     this.x = props?.x ?? 0
     this.y = props?.y ?? 0
@@ -110,6 +114,8 @@ export class BaseElement {
    * Element method for checking is element in viewport.
    */
   isVisible(canvas: HTMLCanvasElement, offsetX: number, offsetY: number, zoom: number) {
+    if (!this.visibility) return false
+
     const isVisibleFromRight = this.x + offsetX < canvas.width / zoom
     const isVisibleFromLeft = this.x + offsetX + this.width > 0
     const isVisibleFromTop = this.y + offsetY + this.height > 0

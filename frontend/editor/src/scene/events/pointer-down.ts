@@ -48,9 +48,26 @@ export function handlePointerDown(event: PointerEvent, state: EditorState) {
 
           return
         } else {
-          state.selectedElementsFixedState.clear()
-          state.selectionFrame = null
-          state.selectedIds = []
+          const visibleElements = getVisibleElements(
+            state.staticCtx!,
+            state.canvasOffset.x,
+            state.canvasOffset.y,
+            state.zoom,
+            state.objectsMap,
+          )
+          const element = getElementWithCursorInside(visibleElements, cursorX, cursorY)
+          if (element) {
+            state.selectionFrame = getSelectionFrame([element])
+            state.selectedIds = [element.id]
+            state.isReplacing = true
+            state.replaceFrameOffset.x = cursorX - element.x
+            state.replaceFrameOffset.y = cursorY - element.y
+            return
+          } else {
+            state.selectedElementsFixedState.clear()
+            state.selectionFrame = null
+            state.selectedIds = []
+          }
         }
       } else {
         const visibleElements = getVisibleElements(
@@ -62,13 +79,7 @@ export function handlePointerDown(event: PointerEvent, state: EditorState) {
         )
         const element = getElementWithCursorInside(visibleElements, cursorX, cursorY)
         if (element) {
-          state.selectionFrame = {
-            leftX: element.x,
-            leftY: element.y,
-            rightX: element.x + element.width,
-            rightY: element.y + element.height,
-          }
-
+          state.selectionFrame = getSelectionFrame([element])
           state.selectedIds = [element.id]
           state.isReplacing = true
           state.replaceFrameOffset.x = cursorX - element.x

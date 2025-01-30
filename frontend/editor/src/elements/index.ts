@@ -2,6 +2,7 @@ import { ElementType } from './base'
 import { EllipseElement } from './ellipse'
 import { RectangleElement } from './rectangle'
 
+export { TextElement } from './text.ts'
 export { ElementType }
 export type Element = RectangleElement | EllipseElement
 
@@ -25,6 +26,7 @@ export function newElement(type: ElementType, x: number, y: number, color?: stri
 export function isCursorInSomeElement(elements: Element[], cursorX: number, cursorY: number) {
   return elements.some((el) => el.isPointInside(cursorX, cursorY))
 }
+
 export function getElementWithCursorInside(elements: Element[], cursorX: number, cursorY: number) {
   return elements.find((el) => el.isPointInside(cursorX, cursorY))
 }

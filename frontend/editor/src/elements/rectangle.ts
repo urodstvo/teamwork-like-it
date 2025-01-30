@@ -32,5 +32,7 @@ export class RectangleElement extends BaseElement {
     ctx.stroke()
 
     ctx.restore()
+
+    this.text.draw(ctx, leftX + this.width / 2, leftY + this.height / 2)
   }
 }

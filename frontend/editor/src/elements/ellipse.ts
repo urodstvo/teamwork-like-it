@@ -22,5 +22,7 @@ export class EllipseElement extends BaseElement {
     ctx.stroke()
 
     ctx.restore()
+
+    this.text.draw(ctx, centerX, centerY)
   }
 }

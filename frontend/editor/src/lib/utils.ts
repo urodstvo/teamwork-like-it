@@ -55,3 +55,7 @@ export function throttleRAF<T extends any[]>(fn: (...args: T) => void, opts?: { 
   }
   return ret
 }
+
+export function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2)
+}

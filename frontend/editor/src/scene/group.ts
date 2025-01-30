@@ -1,4 +1,5 @@
 import type { EditorState } from '@/store'
+import { generateId } from '@/lib/utils.ts'
 
 export interface GroupType {
   id: string
@@ -12,7 +13,7 @@ export class Group {
   children: string[] = []
 
   constructor(...children: string[]) {
-    this.id = Date.now().toString(36) + Math.random().toString(36).substring(2)
+    this.id = generateId()
     this.name = `Group ${this.id}`
 
     this.children = children
