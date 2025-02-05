@@ -1,8 +1,8 @@
 import type { EditorState } from '@/store'
-import { getVisibleElements } from '@/lib/helpers'
+import { getVisibleElements, getVisibleLinks } from '@/lib/helpers'
 // import { throttleRAF } from '@/lib/utils.ts'
 import { _clearCanvas, _transformCanvas } from '.'
-import { renderElements } from './element.ts'
+import { renderElements, renderLinks } from './element.ts'
 
 function _renderBackgroundGrid(
   ctx: CanvasRenderingContext2D,
@@ -48,8 +48,16 @@ function _renderStaticScene(state: EditorState) {
     state.zoom,
     state.objectsMap,
   )
+  const visibleLinks = getVisibleLinks(
+    state.interactiveCtx!,
+    state.canvasOffset.x,
+    state.canvasOffset.y,
+    state.zoom,
+    state.linksMap,
+  )
 
   renderElements(state.staticCtx!, state.canvasOffset, visibleElements)
+  renderLinks(state.staticCtx!, state.canvasOffset, visibleLinks)
 }
 
 /** throttled to animation framerate */

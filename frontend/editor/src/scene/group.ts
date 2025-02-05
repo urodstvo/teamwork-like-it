@@ -19,13 +19,13 @@ export class Group {
     this.children = children
   }
 
-  _getAllChildrenElements(objectsMap: EditorState['objectsMap'], ids: string[]): string[] {
+  getAllChildrenElements(objectsMap: EditorState['objectsMap'], ids: string[] = this.children): string[] {
     const result = [] as string[]
     for (const id in ids) {
       const obj = objectsMap.get(id)
       if (obj) {
         if ('children' in obj && obj.children.length > 0) {
-          result.push(...this._getAllChildrenElements(objectsMap, obj.children))
+          result.push(...this.getAllChildrenElements(objectsMap, obj.children))
         } else {
           result.push(obj.id)
         }
@@ -37,10 +37,10 @@ export class Group {
 
   markAsSelected(state: EditorState) {
     state.selectedIds.splice(0, state.selectedIds.length)
-    state.selectedIds.push(...this._getAllChildrenElements(state.objectsMap, this.children))
+    state.selectedIds.push(...this.getAllChildrenElements(state.objectsMap))
   }
 
   addToSelected(state: EditorState) {
-    state.selectedIds.push(...this._getAllChildrenElements(state.objectsMap, this.children))
+    state.selectedIds.push(...this.getAllChildrenElements(state.objectsMap))
   }
 }

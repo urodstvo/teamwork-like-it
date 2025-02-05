@@ -23,7 +23,7 @@ const objs = ids.map((id) => store.objectsMap.get(id)!)
           cn(
             'px-4 py-1 text-sm text-nowrap overflow-ellipsis whitespace-nowrap overflow-hidden [&:not(:last-of-type)]:border-b',
             {
-              'bg-sky-400 text-white': store.selectedIds.includes(obj.id),
+              'bg-sky-400 text-white': store.selectionFrame.children.includes(obj),
             },
           )
         "

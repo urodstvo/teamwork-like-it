@@ -1,6 +1,7 @@
+import type { EventType } from '@/scene/events'
 import type { EditorState } from '@/store'
 import { TextElement } from '@/elements'
-import { normalizePoint } from '@/lib/helpers'
+import { getOffsetedPointerPosition, normalizePoint, pointer } from '@/lib/helpers'
 import { generateId } from '@/lib/utils.ts'
 
 export enum ElementType {
@@ -8,6 +9,7 @@ export enum ElementType {
   RECTANGLE = 'rectangle',
   ELLIPSE = 'ellipse',
   TRIANGLE = 'triangle',
+  LINE = 'line',
 }
 
 export interface BaseElementType {
@@ -53,6 +55,21 @@ export class BaseElement {
   visibility: boolean = true
   text: TextElement = new TextElement()
 
+  // util parameters
+  isSelected: boolean = false
+
+  events: {
+    [T in keyof EventType]?: ((event: EventType[T], state: EditorState) => boolean)[]
+  } = {
+    pointerdown: [],
+    pointermove: [],
+    pointerup: [],
+  }
+
+  isHovered = false
+  anchorPointX: number = 0
+  anchorPointY: number = 0
+
   /**
    * Element constructor for creating an instance.
    */
@@ -69,12 +86,120 @@ export class BaseElement {
     this.borderRadius = props?.borderRadius ?? 0
     this.fillColor = props?.fillColor ?? 'rgba(0,0,0,1)'
     this.strokeColor = props?.strokeColor ?? 'rgba(0,0,0,1)'
+
+    this.events.pointerdown?.push(
+      pointer('in', (_e, state) => {
+        if (state.newLine) return
+
+        state.selectionFrame.setSelected([this])
+        this.isSelected = true
+      })(this),
+      pointer('in', (event, state) => {
+        if (!state.newLine) return
+
+        const { x, y } = getOffsetedPointerPosition(event, state.interactiveCanvasRef!, state.zoom, state.canvasOffset)
+        if (!state.newLine.isDrawing) {
+          const anchor = this.getAnchorPoint(x - (this.x + this.width / 2), this.y + this.height / 2 - y)
+          if (anchor) {
+            this.anchorPointY = anchor.y
+            this.anchorPointX = anchor.x
+          }
+
+          state.newLine._setSource({
+            type: 'element',
+            element: this,
+            anchor: 'border',
+            offsetX: this.anchorPointX,
+            offsetY: this.anchorPointY,
+          })
+        }
+      })(this),
+    )
+    this.events.pointermove?.push(
+      pointer('in', (event, state) => {
+        if (!state.newLine) return
+        const { x, y } = getOffsetedPointerPosition(event, state.interactiveCanvasRef!, state.zoom, state.canvasOffset)
+        this.isHovered = true
+
+        const anchor = this.getAnchorPoint(x - (this.x + this.width / 2), this.y + this.height / 2 - y)
+        if (anchor) {
+          this.anchorPointY = anchor.y
+          this.anchorPointX = anchor.x
+        }
+        state.newLine.element.dst = {
+          type: 'element',
+          element: this,
+          anchor: 'border',
+          offsetX: this.anchorPointX,
+          offsetY: this.anchorPointY,
+        }
+      })(this),
+      pointer('out', (_e, state) => {
+        if (!state.newLine) return
+
+        this.isHovered = false
+      })(this),
+    )
+    this.events.pointerup?.push(
+      pointer('in', (_event, state) => {
+        if (!state.newLine) return
+
+        this.isHovered = false
+        if (state.newLine.isDrawing) {
+          state.newLine._setDestination(
+            {
+              type: 'element',
+              element: this,
+              anchor: 'border',
+              offsetX: this.anchorPointX,
+              offsetY: this.anchorPointY,
+            },
+            state,
+          )
+        }
+      })(this),
+    )
+  }
+
+  trigger<T extends keyof EventType>(type: T, event: EventType[T], state: EditorState) {
+    let isAllTriggered = false
+    let isSomeTriggered = false
+    let isNotTriggered = true
+
+    const handlers = this.events[type]
+
+    if (!handlers) {
+      return {
+        isAllTriggered,
+        isSomeTriggered,
+        isNotTriggered,
+      }
+    }
+
+    const triggered = handlers.map((handler) => handler(event, state))
+
+    isAllTriggered = triggered.every(Boolean)
+    isSomeTriggered = triggered.some(Boolean)
+    isNotTriggered = !isSomeTriggered
+
+    return {
+      isAllTriggered,
+      isSomeTriggered,
+      isNotTriggered,
+    }
   }
 
   /**
    *   Element method for rendering on the canvas.
    */
   draw(..._args: unknown[]) {
+    throw new Error('Base element cannot be rendered.')
+  }
+
+  /**
+   *   Element method for rendering border on the canvas.
+   */
+  drawOutline(..._args: unknown[]) {
     throw new Error('Base element cannot be rendered.')
   }
 
@@ -139,12 +264,16 @@ export class BaseElement {
     if (strokeColor) this.strokeColor = strokeColor
   }
 
-  markAsSelected(state: EditorState) {
-    state.selectedIds.splice(0, state.selectedIds.length)
-    state.selectedIds.push(this.id)
-  }
+  // markAsSelected(state: EditorState) {
+  //   state.selectedIds.splice(0, state.selectedIds.length)
+  //   state.selectedIds.push(this.id)
+  // }
+  //
+  // addToSelected(state: EditorState) {
+  //   state.selectedIds.push(this.id)
+  // }
 
-  addToSelected(state: EditorState) {
-    state.selectedIds.push(this.id)
+  getAnchorPoint(_x: number, _y: number): { x: number; y: number } | null {
+    throw new Error('Method not implemented.')
   }
 }

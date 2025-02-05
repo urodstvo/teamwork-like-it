@@ -1,10 +1,10 @@
-import { ElementType } from './base'
+import { type BaseElement, ElementType } from './base'
 import { EllipseElement } from './ellipse'
 import { RectangleElement } from './rectangle'
 
 export { TextElement } from './text.ts'
 export { ElementType }
-export type Element = RectangleElement | EllipseElement
+export type Element = BaseElement | RectangleElement | EllipseElement
 
 export function moveElements(elements: Element[], moveByX: number, moveByY: number) {
   elements.forEach((element) => element.moveBy(moveByX, moveByY))
@@ -15,7 +15,7 @@ export function moveElements(elements: Element[], moveByX: number, moveByY: numb
 export function newElement(type: ElementType, x: number, y: number, color?: string) {
   switch (type) {
     case ElementType.RECTANGLE:
-      return new RectangleElement({ x, y, type, fillColor: color, strokeColor: color })
+      return new RectangleElement({ x, y, type, fillColor: color, strokeColor: color, borderRadius: 16 })
     case ElementType.ELLIPSE:
       return new EllipseElement({ x, y, type, fillColor: color, strokeColor: color })
     default:

@@ -1,36 +1,10 @@
 import type { EditorState } from '@/store'
-import { getAllElements, getPointerPosition, getSelectedElements, setResizeCursor } from '@/lib/helpers'
-import {
-  getDirection,
-  getSelectedElementsFromSelectionArea,
-  getSelectionFrame,
-  isCursorInSelectionFrame,
-  isCursorOnSelectionFrameBound,
-  replaceSelectionFrame,
-  resizeSelectionFrame,
-} from '@/scene/selection.ts'
+import { getVisibleElements } from '@/lib/helpers'
 
 const dragSpeed = 1.0
 const lastMousePosition = { x: 0, y: 0 }
 
 export function handlePointerMove(event: PointerEvent, state: EditorState) {
-  const { x, y } = getPointerPosition(event, state.interactiveCanvasRef!, state.zoom)
-
-  if (state.newElement) state.newElement.moveTo(x, y)
-
-  if (state.isSelecting) {
-    state.selectionArea!.rightX = x
-    state.selectionArea!.rightY = y
-
-    const allElements = getAllElements(state.objectsMap)
-
-    const selectedElements = getSelectedElementsFromSelectionArea(allElements, state.selectionArea, state.canvasOffset)
-    if (selectedElements.length > 0 && state.selectedIds.length !== selectedElements.length) {
-      state.selectionFrame = getSelectionFrame(selectedElements)
-      state.selectedIds = selectedElements.map((el) => el.id)
-    }
-  }
-
   if (state.isDragging) {
     if (!state.startDragPosition) return
 
@@ -45,28 +19,18 @@ export function handlePointerMove(event: PointerEvent, state: EditorState) {
     state.canvasOffset.y = currentOffsetY
   }
 
-  if (state.selectionFrame) {
-    const cursorX = x - state.canvasOffset.x
-    const cursorY = y - state.canvasOffset.y
-
-    if (state.isReplacing) replaceSelectionFrame(state, cursorX, cursorY)
-    const selectedElements = getSelectedElements(state)
-    const selectionFrame = getSelectionFrame(selectedElements)
-
-    const cursorInSelectionFrame = isCursorInSelectionFrame(selectionFrame, cursorX, cursorY)
-    const cursorOnSelectionFrameBound = isCursorOnSelectionFrameBound(selectionFrame, cursorX, cursorY)
-    if ((cursorInSelectionFrame && !state.isResizing) || state.isReplacing) {
-      if (cursorOnSelectionFrameBound.some((el) => el))
-        document.body.style.cursor = `${getDirection(selectionFrame, cursorX, cursorY)}-resize`
-      else document.body.style.cursor = 'move'
-    } else if (state.isResizing) {
-      setResizeCursor(state.resizeDirection)
-    } else {
-      document.body.style.cursor = 'default'
-    }
-
-    if (state.isResizing) resizeSelectionFrame(state, cursorX, cursorY)
-  }
+  const elements = getVisibleElements(
+    state.interactiveCtx!,
+    state.canvasOffset.x,
+    state.canvasOffset.y,
+    state.zoom,
+    state.objectsMap,
+  )
+  state.newLine?.trigger('pointermove', event, state)
+  elements.forEach((el) => el.trigger('pointermove', event, state))
+  state.selectionFrame.trigger('pointermove', event, state)
+  state.selectionArea.trigger('pointermove', event, state)
+  state.newElement?.trigger('pointermove', event, state)
 
   lastMousePosition.x = event.clientX
   lastMousePosition.y = event.clientY

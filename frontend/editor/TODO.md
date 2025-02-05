@@ -8,6 +8,7 @@
 - [ ] add basic elements (arrow, circle, triangle, ...)
 - [ ] insert text
 - [ ] zoom to selection
+- [ ] make the ability link elements by arrow
 
 ---
 

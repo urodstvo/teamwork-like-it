@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ElementType, newElement } from '@/elements'
+import { Line } from '@/links'
+import { NewElement, NewLine } from '@/scene'
 import { useEditorStore } from '@/store'
 import { Circle, MoveUpRight, Square } from 'lucide-vue-next'
 
@@ -16,38 +18,64 @@ const store = useEditorStore()
 //   }
 // }
 
-function buttonClick(type: ElementType) {
+function elementButtonClick(type: ElementType) {
   if (store.newElement) {
     store.newElement = null
     document.body.style.cursor = 'default'
   } else {
-    store.newElement = newElement(type, -1000, -1000, 'rgba(0, 0, 0, 0.1)')
-    document.body.style.cursor = 'copy'
+    store.newElement = new NewElement(newElement(type, -1000e10, -1000e10))
+    document.body.style.cursor = 'crosshair'
+  }
+}
+
+function lineButtonClick() {
+  if (store.isDrawingLine) {
+    store.newLine = null
+    document.body.style.cursor = 'default'
+  } else {
+    store.newLine = new NewLine(
+      new Line(
+        {
+          type: 'point',
+          x: -1000e10,
+          y: -1000e10,
+        },
+        {
+          type: 'point',
+          x: -1000e10,
+          y: -1000e10,
+        },
+      ),
+    )
+    document.body.style.cursor = 'crosshair'
   }
 }
 </script>
 
 <template>
   <section class="toolbar">
-    <div class="toolbar__content" :class="{ hidden: store.isReplacing || store.isDragging || store.isDragging }">
+    <div
+      class="toolbar__content"
+      :class="{ hidden: store.selectionFrame.isReplacing || store.selectionFrame.isResizing || store.isDragging }"
+    >
       <div class="zoom">zoom: {{ store.zoom * 100 }}%</div>
       <div class="divider" />
       <div class="actions">
         <button
-          :class="{ active: store.newElement?.type === ElementType.RECTANGLE }"
-          :aria-pressed="store.newElement?.type === ElementType.RECTANGLE"
-          @click="() => buttonClick(ElementType.RECTANGLE)"
+          :class="{ active: store.newElement?.element.type === ElementType.RECTANGLE }"
+          :aria-pressed="store.newElement?.element.type === ElementType.RECTANGLE"
+          @click="() => elementButtonClick(ElementType.RECTANGLE)"
         >
           <Square class="icon" />
         </button>
         <button
-          :class="{ active: store.newElement?.type === ElementType.ELLIPSE }"
-          :aria-pressed="store.newElement?.type === ElementType.ELLIPSE"
-          @click="() => buttonClick(ElementType.ELLIPSE)"
+          :class="{ active: store.newElement?.element.type === ElementType.ELLIPSE }"
+          :aria-pressed="store.newElement?.element.type === ElementType.ELLIPSE"
+          @click="() => elementButtonClick(ElementType.ELLIPSE)"
         >
           <Circle class="icon" />
         </button>
-        <button>
+        <button :class="{ active: store.isDrawingLine }" :aria-pressed="store.isDrawingLine" @click="lineButtonClick">
           <MoveUpRight class="icon" />
         </button>
       </div>

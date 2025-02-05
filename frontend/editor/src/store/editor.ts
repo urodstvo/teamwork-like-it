@@ -1,5 +1,7 @@
-import type { Group } from '@/scene/group.ts'
+import type { Line } from '@/links'
+import type { Group, NewElement, NewLine } from '@/scene'
 import { type Element, ElementType } from '@/elements'
+import { SelectionArea, SelectionFrame } from '@/scene/selection.ts'
 import { defineStore } from 'pinia'
 
 export const useEditorStore = defineStore('canvas-app', () => {
@@ -10,31 +12,19 @@ export const useEditorStore = defineStore('canvas-app', () => {
   const interactiveCtx = null as CanvasRenderingContext2D | null
   const canvasOffset = { x: 0, y: 0 }
 
-  // const elements = ref<Element[]>([])
-  // const elements = [] as Element[]
-
   const isDragging = false
-  const isSelecting = false
-  const isReplacing = false
-  const isResizing = false
+  const isDrawingLine = false
 
-  const selectionArea = null as {
-    leftX: number
-    leftY: number
-    rightX: number
-    rightY: number
-  } | null
-  const selectionFrame = null as { leftX: number; leftY: number; rightX: number; rightY: number } | null
-  const selectedIds = [] as string[]
-  const selectedElementsFixedState = new Map<string, Element>()
+  const selectionFrame = new SelectionFrame()
+  const selectionArea = new SelectionArea()
 
   const startDragPosition = null as { x: number; y: number } | null
-  const replaceFrameOffset = { x: 0, y: 0 }
 
   const zoom = 1.0
   const zoomedTo = { x: 0, y: 0 }
 
-  const newElement = null as Element | null
+  const newLine = null as NewLine | null
+  const newElement = null as NewElement | null
   const lastElementType = ElementType.ELLIPSE
   const cursorPosition = { x: 0, y: 0 }
 
@@ -47,6 +37,7 @@ export const useEditorStore = defineStore('canvas-app', () => {
 
   const layers = [] as Group[]
   const objectsMap = new Map<string, Element | Group>()
+  const linksMap = new Map<string, Line>()
 
   return {
     canvasGridSize,
@@ -54,10 +45,8 @@ export const useEditorStore = defineStore('canvas-app', () => {
     interactiveCanvasRef,
     staticCtx,
     interactiveCtx,
-    // elements,
     canvasOffset,
     selectionArea,
-    isSelecting,
     isDragging,
     startDragPosition,
     zoom,
@@ -65,15 +54,13 @@ export const useEditorStore = defineStore('canvas-app', () => {
     lastElementType,
     cursorPosition,
     selectionFrame,
-    isReplacing,
-    replaceFrameOffset,
-    selectedIds,
     zoomedTo,
-    isResizing,
     resizeDirection,
-    selectedElementsFixedState,
     layers,
     objectsMap,
+    isDrawingLine,
+    newLine,
+    linksMap,
   }
 })
 

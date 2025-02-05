@@ -1,27 +1,22 @@
 import type { EditorState } from '@/store'
+import { getVisibleElements } from '@/lib/helpers'
 
 export function handlePointerUp(event: PointerEvent, state: EditorState) {
   switch (event.button) {
     case 0: {
-      if (state.isSelecting) {
-        state.isSelecting = false
-        state.selectionArea = null
-      }
-
-      if (state.isReplacing) {
-        state.isReplacing = false
-        state.selectionArea = null
-      }
-
-      if (state.isResizing) {
-        state.isResizing = false
-        state.resizeDirection.left = false
-        state.resizeDirection.top = false
-        state.resizeDirection.bottom = false
-        state.resizeDirection.right = false
-        document.body.style.cursor = 'default'
-      }
-
+      const elements = getVisibleElements(
+        state.interactiveCtx!,
+        state.canvasOffset.x,
+        state.canvasOffset.y,
+        state.zoom,
+        state.objectsMap,
+      )
+      elements.forEach((el) => el.trigger('pointerup', event, state))
+      state.selectionFrame.trigger('pointerup', event, state)
+      state.selectionArea.trigger('pointerup', event, state)
+      state.newElement?.trigger('pointerup', event, state)
+      state.newLine?.trigger('pointerup', event, state)
+      document.body.style.cursor = 'default'
       break
     }
     case 2: {

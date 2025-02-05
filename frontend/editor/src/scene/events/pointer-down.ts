@@ -1,95 +1,81 @@
 import type { EditorState } from '@/store'
-import { getElementWithCursorInside } from '@/elements'
-import { getPointerPosition, getSelectedElements, getVisibleElements } from '@/lib/helpers'
-import { Group } from '@/scene/group.ts'
-import { getSelectionFrame, isCursorInSelectionFrame, isCursorOnSelectionFrameBound } from '@/scene/selection'
+import { getPointerPosition, getVisibleElements } from '@/lib/helpers'
 
 export function handlePointerDown(event: PointerEvent, state: EditorState) {
   const { x, y } = getPointerPosition(event, state.interactiveCanvasRef!, state.zoom)
+  // const cursorX = x - state.canvasOffset.x
+  // const cursorY = y - state.canvasOffset.y
+  // const visibleElements = getVisibleElements(
+  //   state.staticCtx!,
+  //   state.canvasOffset.x,
+  //   state.canvasOffset.y,
+  //   state.zoom,
+  //   state.objectsMap,
+  // )
 
   switch (event.button) {
     case 0: {
-      if (state.newElement) {
-        state.newElement.restyle('rgba(0,0,0,1)', 'rgba(0,0,0,1)')
-        state.newElement.moveBy(-state.canvasOffset.x, -state.canvasOffset.y)
-        state.layers.push(new Group(state.newElement.id))
-        state.objectsMap.set(state.newElement.id, state.newElement)
-        state.lastElementType = state.newElement.type
-        state.selectedIds = [state.newElement.id]
-        state.selectionFrame = getSelectionFrame([state.newElement])
-        state.newElement = null
-        document.body.style.cursor = 'default'
+      // if (state.isDrawingLine) {
+      // const element = getElementWithCursorInside(visibleElements, cursorX, cursorY)
+      // const offsetX = element ? cursorX - (element.x + element.width / 2) : 0
+      // const offsetY = element ? cursorY - (element.y + element.height / 2) : 0
+      // if (state.newLine === null) {
+      //   state.newLine = new Line(
+      //     !element
+      //       ? {
+      //           type: 'point',
+      //           x: cursorX,
+      //           y: cursorY,
+      //         }
+      //       : {
+      //           type: 'element',
+      //           offsetX,
+      //           offsetY,
+      //           element,
+      //           anchor: 'border',
+      //         },
+      //     {
+      //       type: 'point',
+      //       x: cursorX,
+      //       y: cursorY,
+      //     },
+      //   )
+      //   return
+      // } else {
+      //   state.newLine.dst = !element
+      //     ? {
+      //         type: 'point',
+      //         x: cursorX,
+      //         y: cursorY,
+      //       }
+      //     : {
+      //         type: 'element',
+      //         offsetX,
+      //         offsetY,
+      //         element,
+      //         anchor: 'border',
+      //       }
+      //
+      //   state.linksMap.set(state.newLine.id, state.newLine)
+      //   state.newLine = null
+      //   state.isDrawingLine = false
+      //   document.body.style.cursor = 'default'
+      //   return
+      // }
+      // }
 
-        return
-      }
-
-      const cursorX = x - state.canvasOffset.x
-      const cursorY = y - state.canvasOffset.y
-      if (state.selectionFrame) {
-        const selectedElements = getSelectedElements(state)
-        const selectionFrame = getSelectionFrame(selectedElements)
-        if (isCursorInSelectionFrame(selectionFrame, cursorX, cursorY)) {
-          const cursorOnSelectionFrameBound = isCursorOnSelectionFrameBound(selectionFrame, cursorX, cursorY)
-          if (cursorOnSelectionFrameBound.some((el) => el)) {
-            state.isResizing = true
-
-            const [left, top, right, bottom] = cursorOnSelectionFrameBound
-            state.resizeDirection.left = left
-            state.resizeDirection.right = right
-            state.resizeDirection.top = top
-            state.resizeDirection.bottom = bottom
-
-            return
-          }
-
-          state.isReplacing = true
-          state.replaceFrameOffset.x = cursorX - selectionFrame.leftX
-          state.replaceFrameOffset.y = cursorY - selectionFrame.leftY
-
-          return
-        } else {
-          const visibleElements = getVisibleElements(
-            state.staticCtx!,
-            state.canvasOffset.x,
-            state.canvasOffset.y,
-            state.zoom,
-            state.objectsMap,
-          )
-          const element = getElementWithCursorInside(visibleElements, cursorX, cursorY)
-          if (element) {
-            state.selectionFrame = getSelectionFrame([element])
-            state.selectedIds = [element.id]
-            state.isReplacing = true
-            state.replaceFrameOffset.x = cursorX - element.x
-            state.replaceFrameOffset.y = cursorY - element.y
-            return
-          } else {
-            state.selectedElementsFixedState.clear()
-            state.selectionFrame = null
-            state.selectedIds = []
-          }
-        }
-      } else {
-        const visibleElements = getVisibleElements(
-          state.staticCtx!,
-          state.canvasOffset.x,
-          state.canvasOffset.y,
-          state.zoom,
-          state.objectsMap,
-        )
-        const element = getElementWithCursorInside(visibleElements, cursorX, cursorY)
-        if (element) {
-          state.selectionFrame = getSelectionFrame([element])
-          state.selectedIds = [element.id]
-          state.isReplacing = true
-          state.replaceFrameOffset.x = cursorX - element.x
-          state.replaceFrameOffset.y = cursorY - element.y
-          return
-        }
-      }
-
-      state.selectionArea = { leftX: x, leftY: y, rightX: x, rightY: y }
-      state.isSelecting = true
+      const elements = getVisibleElements(
+        state.interactiveCtx!,
+        state.canvasOffset.x,
+        state.canvasOffset.y,
+        state.zoom,
+        state.objectsMap,
+      )
+      elements.forEach((el) => el.trigger('pointerdown', event, state))
+      state.selectionFrame.trigger('pointerdown', event, state)
+      state.selectionArea.trigger('pointerdown', event, state)
+      state.newElement?.trigger('pointerdown', event, state)
+      state.newLine?.trigger('pointerdown', event, state)
 
       break
     }
